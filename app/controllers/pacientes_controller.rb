@@ -68,3 +68,9 @@ class PacientesController < ApplicationController
       params.expect(paciente: [ :nombre, :apellidos, :dni, :telefono, :direccion, :email ])
     end
 end
+
+  private
+
+    def paciente_params
+      params.require(:paciente).permit(:nombre, :apellido)
+end
