@@ -4,6 +4,15 @@ class AgendasControllerTest < ActionDispatch::IntegrationTest
   setup do
     @agenda = agendas(:one)
   end
+  before_action :authenticate_user!
+  before_action :authorize_admin!, only: [:create, :update, :destroy]
+
+  private
+
+  def authorize_admin!
+    redirect_to root_path, alert: "No autorizado" unless current_user.role == "admin"
+  end
+
 
   test "should get index" do
     get agendas_url

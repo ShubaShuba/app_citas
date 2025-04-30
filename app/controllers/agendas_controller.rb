@@ -1,6 +1,14 @@
 class AgendasController < ApplicationController
   before_action :set_agenda, only: %i[ show edit update destroy ]
-
+  before_action :authenticate_user!
+  before_action :authorize_admin!, only: [:create, :update, :destroy]
+  
+  private
+  
+  def authorize_admin!
+    redirect_to root_path, alert: "No autorizado" unless current_user.role == "admin"
+  end
+  
   # GET /agendas or /agendas.json
   def index
     @agendas = Agenda.all

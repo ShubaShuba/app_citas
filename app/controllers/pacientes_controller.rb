@@ -1,76 +1,59 @@
 class PacientesController < ApplicationController
-  before_action :set_paciente, only: %i[ show edit update destroy ]
+  skip_before_action :verify_authenticity_token
+  before_action :authenticate_user!
+  before_action :require_admin, only: [:create, :update, :destroy]
+  before_action :set_paciente, only: %i[show edit update destroy]
 
-  # GET /pacientes or /pacientes.json
+  # GET /pacientes
   def index
     @pacientes = Paciente.all
+    render json: @pacientes
   end
 
-  # GET /pacientes/1 or /pacientes/1.json
+  # GET /pacientes/:id
   def show
+    render json: @paciente
   end
 
-  # GET /pacientes/new
-  def new
-    @paciente = Paciente.new
-  end
-
-  # GET /pacientes/1/edit
-  def edit
-  end
-
-  # POST /pacientes or /pacientes.json
+  # POST /pacientes
   def create
     @paciente = Paciente.new(paciente_params)
 
-    respond_to do |format|
-      if @paciente.save
-        format.html { redirect_to @paciente, notice: "Paciente was successfully created." }
-        format.json { render :show, status: :created, location: @paciente }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @paciente.errors, status: :unprocessable_entity }
-      end
+    if @paciente.save
+      render json: @paciente, status: :created
+    else
+      render json: @paciente.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /pacientes/1 or /pacientes/1.json
+  # PATCH/PUT /pacientes/:id
   def update
-    respond_to do |format|
-      if @paciente.update(paciente_params)
-        format.html { redirect_to @paciente, notice: "Paciente was successfully updated." }
-        format.json { render :show, status: :ok, location: @paciente }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @paciente.errors, status: :unprocessable_entity }
-      end
+    if @paciente.update(paciente_params)
+      render json: @paciente, status: :ok
+    else
+      render json: @paciente.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /pacientes/1 or /pacientes/1.json
+  # DELETE /pacientes/:id
   def destroy
-    @paciente.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to pacientes_path, status: :see_other, notice: "Paciente was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    @paciente.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_paciente
-      @paciente = Paciente.find(params.expect(:id))
+
+  def set_paciente
+    @paciente = Paciente.find(params[:id])
+  end
+
+  def paciente_params
+    params.require(:paciente).permit(:nombre, :apellidos, :dni, :telefono, :direccion, :email)
+  end
+
+  def require_admin
+    unless current_user&.admin?
+      render json: { error: "Acceso denegado. Se requieren permisos de administrador." }, status: :unauthorized
     end
-
-    # Only allow a list of trusted parameters through.
-    def paciente_params
-      params.expect(paciente: [ :nombre, :apellidos, :dni, :telefono, :direccion, :email ])
-    end
-end
-
-  private
-
-    def paciente_params
-      params.require(:paciente).permit(:nombre, :apellido)
+  end
 end

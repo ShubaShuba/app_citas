@@ -1,70 +1,59 @@
 class MedicosController < ApplicationController
-  before_action :set_medico, only: %i[ show edit update destroy ]
+  skip_before_action :verify_authenticity_token
+  before_action :authenticate_user!
+  before_action :require_admin, only: [:create, :update, :destroy]
+  before_action :set_medico, only: %i[show edit update destroy]
 
-  # GET /medicos or /medicos.json
+  # GET /medicos
   def index
     @medicos = Medico.all
+    render json: @medicos
   end
 
-  # GET /medicos/1 or /medicos/1.json
+  # GET /medicos/:id
   def show
+    render json: @medico
   end
 
-  # GET /medicos/new
-  def new
-    @medico = Medico.new
-  end
-
-  # GET /medicos/1/edit
-  def edit
-  end
-
-  # POST /medicos or /medicos.json
+  # POST /medicos
   def create
     @medico = Medico.new(medico_params)
 
-    respond_to do |format|
-      if @medico.save
-        format.html { redirect_to @medico, notice: "Medico was successfully created." }
-        format.json { render :show, status: :created, location: @medico }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @medico.errors, status: :unprocessable_entity }
-      end
+    if @medico.save
+      render json: @medico, status: :created
+    else
+      render json: @medico.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /medicos/1 or /medicos/1.json
+  # PATCH/PUT /medicos/:id
   def update
-    respond_to do |format|
-      if @medico.update(medico_params)
-        format.html { redirect_to @medico, notice: "Medico was successfully updated." }
-        format.json { render :show, status: :ok, location: @medico }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @medico.errors, status: :unprocessable_entity }
-      end
+    if @medico.update(medico_params)
+      render json: @medico, status: :ok
+    else
+      render json: @medico.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /medicos/1 or /medicos/1.json
+  # DELETE /medicos/:id
   def destroy
-    @medico.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to medicos_path, status: :see_other, notice: "Medico was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    @medico.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_medico
-      @medico = Medico.find(params.expect(:id))
-    end
 
-    # Only allow a list of trusted parameters through.
-    def medico_params
-      params.expect(medico: [ :nombre, :apellidos, :especialidad, :dni, :telefono, :email ])
+  def set_medico
+    @medico = Medico.find(params[:id])
+  end
+
+  def medico_params
+    params.require(:medico).permit(:nombre, :apellidos, :especialidad, :dni, :telefono, :email)
+  end
+
+  def require_admin
+    unless current_user&.admin?
+      render json: { error: "Acceso denegado. Se requieren permisos de administrador." }, status: :unauthorized
     end
+  end
 end

@@ -1,6 +1,14 @@
 class CitaController < ApplicationController
   before_action :set_citum, only: %i[ show edit update destroy ]
-
+  before_action :authenticate_user!
+  before_action :authorize_admin!, only: [:create, :update, :destroy]
+  
+  private
+  
+  def authorize_admin!
+    redirect_to root_path, alert: "No autorizado" unless current_user.role == "admin"
+  end
+  
   # GET /cita or /cita.json
   def index
     @cita = Citum.all

@@ -45,4 +45,14 @@ class CitaControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to cita_url
   end
+  before_action :authenticate_user!
+  before_action :authorize_admin!, only: [:create, :update, :destroy]
+  
+  private
+  
+  def authorize_admin!
+    redirect_to root_path, alert: "No autorizado" unless current_user.role == "admin"
+  end
+  
+  
 end
