@@ -1,6 +1,6 @@
-class CreateCita < ActiveRecord::Migration[8.0]
+class CreateCitas < ActiveRecord::Migration[8.0]
   def change
-    create_table :cita do |t|
+    create_table :citas do |t|
       t.references :paciente, null: false, foreign_key: true
       t.references :medico, null: false, foreign_key: true
       t.date :fecha

@@ -1,78 +1,51 @@
-class CitaController < ApplicationController
-  before_action :set_citum, only: %i[ show edit update destroy ]
-  before_action :authenticate_user!
-  before_action :authorize_admin!, only: [:create, :update, :destroy]
-  
-  private
-  
-  def authorize_admin!
-    redirect_to root_path, alert: "No autorizado" unless current_user.role == "admin"
-  end
-  
-  # GET /cita or /cita.json
+class CitasController < ApplicationController
+  skip_before_action :verify_authenticity_token
+  before_action :set_cita, only: %i[show update destroy]
+
+  # GET /citas
   def index
-    @cita = Citum.all
+    @citas = Cita.all.includes(:paciente, :medico)
+    render json: @citas.as_json(include: [:paciente, :medico])
   end
 
-  # GET /cita/1 or /cita/1.json
+  # GET /citas/:id
   def show
+    render json: @cita.as_json(include: [:paciente, :medico])
   end
 
-  # GET /cita/new
-  def new
-    @citum = Citum.new
-  end
-
-  # GET /cita/1/edit
-  def edit
-  end
-
-  # POST /cita or /cita.json
+  # POST /citas
   def create
-    @citum = Citum.new(citum_params)
+    @cita = Cita.new(cita_params)
 
-    respond_to do |format|
-      if @citum.save
-        format.html { redirect_to @citum, notice: "Citum was successfully created." }
-        format.json { render :show, status: :created, location: @citum }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @citum.errors, status: :unprocessable_entity }
-      end
+    if @cita.save
+      render json: @cita, status: :created
+    else
+      render json: @cita.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /cita/1 or /cita/1.json
+  # PATCH/PUT /citas/:id
   def update
-    respond_to do |format|
-      if @citum.update(citum_params)
-        format.html { redirect_to @citum, notice: "Citum was successfully updated." }
-        format.json { render :show, status: :ok, location: @citum }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @citum.errors, status: :unprocessable_entity }
-      end
+    if @cita.update(cita_params)
+      render json: @cita
+    else
+      render json: @cita.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /cita/1 or /cita/1.json
+  # DELETE /citas/:id
   def destroy
-    @citum.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to cita_path, status: :see_other, notice: "Citum was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    @cita.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_citum
-      @citum = Citum.find(params.expect(:id))
-    end
 
-    # Only allow a list of trusted parameters through.
-    def citum_params
-      params.expect(citum: [ :paciente_id, :medico_id, :consultorio_id, :fecha, :hora, :motivo, :estado ])
-    end
+  def set_cita
+    @cita = Cita.find(params[:id])
+  end
+
+  def cita_params
+    params.require(:cita).permit(:paciente_id, :medico_id, :fecha, :hora, :motivo, :estado)
+  end
 end
