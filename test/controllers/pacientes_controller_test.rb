@@ -6,43 +6,49 @@ class PacientesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get index" do
-    get pacientes_url
+    get pacientes_url, as: :json
     assert_response :success
-  end
-
-  test "should get new" do
-    get new_paciente_url
-    assert_response :success
+    assert_match "application/json", @response.content_type
   end
 
   test "should create paciente" do
     assert_difference("Paciente.count") do
-      post pacientes_url, params: { paciente: { apellidos: @paciente.apellidos, direccion: @paciente.direccion, dni: @paciente.dni, email: @paciente.email, nombre: @paciente.nombre, telefono: @paciente.telefono } }
+      post pacientes_url, params: {
+        paciente: {
+          nombre: "Nuevo",
+          apellidos: "Paciente",
+          direccion: "Calle 123",
+          dni: "99999999X",
+          email: "nuevo@example.com",
+          telefono: "123456789"
+        }
+      }, as: :json
     end
 
-    assert_redirected_to paciente_url(Paciente.last)
+    assert_response :created
+    assert_match "application/json", @response.content_type
   end
 
   test "should show paciente" do
-    get paciente_url(@paciente)
+    get paciente_url(@paciente), as: :json
     assert_response :success
-  end
-
-  test "should get edit" do
-    get edit_paciente_url(@paciente)
-    assert_response :success
+    assert_match "application/json", @response.content_type
   end
 
   test "should update paciente" do
-    patch paciente_url(@paciente), params: { paciente: { apellidos: @paciente.apellidos, direccion: @paciente.direccion, dni: @paciente.dni, email: @paciente.email, nombre: @paciente.nombre, telefono: @paciente.telefono } }
-    assert_redirected_to paciente_url(@paciente)
+    patch paciente_url(@paciente), params: {
+      paciente: { nombre: "Modificado" }
+    }, as: :json
+
+    assert_response :success
+    assert_match "application/json", @response.content_type
   end
 
   test "should destroy paciente" do
     assert_difference("Paciente.count", -1) do
-      delete paciente_url(@paciente)
+      delete paciente_url(@paciente), as: :json
     end
 
-    assert_redirected_to pacientes_url
+    assert_response :no_content
   end
 end

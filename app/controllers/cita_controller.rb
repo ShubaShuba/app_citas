@@ -1,10 +1,10 @@
 class CitasController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :set_cita, only: %i[show update destroy]
+  before_action :set_cita, only: [:show, :update, :destroy]
 
   # GET /citas
   def index
-    @citas = Cita.all.includes(:paciente, :medico)
+    @citas = Cita.includes(:paciente, :medico).all
     render json: @citas.as_json(include: [:paciente, :medico])
   end
 
@@ -16,7 +16,6 @@ class CitasController < ApplicationController
   # POST /citas
   def create
     @cita = Cita.new(cita_params)
-
     if @cita.save
       render json: @cita, status: :created
     else

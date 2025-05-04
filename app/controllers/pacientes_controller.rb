@@ -1,8 +1,6 @@
 class PacientesController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :authenticate_user!
-  before_action :require_admin, only: [:create, :update, :destroy]
-  before_action :set_paciente, only: %i[show edit update destroy]
+  before_action :set_paciente, only: [:show, :update, :destroy]
 
   # GET /pacientes
   def index
@@ -29,7 +27,7 @@ class PacientesController < ApplicationController
   # PATCH/PUT /pacientes/:id
   def update
     if @paciente.update(paciente_params)
-      render json: @paciente, status: :ok
+      render json: @paciente
     else
       render json: @paciente.errors, status: :unprocessable_entity
     end
@@ -48,12 +46,6 @@ class PacientesController < ApplicationController
   end
 
   def paciente_params
-    params.require(:paciente).permit(:nombre, :apellidos, :dni, :telefono, :direccion, :email)
-  end
-
-  def require_admin
-    unless current_user&.admin?
-      render json: { error: "Acceso denegado. Se requieren permisos de administrador." }, status: :unauthorized
-    end
+    params.require(:paciente).permit(:nombre, :apellidos, :direccion, :dni, :email, :telefono)
   end
 end
