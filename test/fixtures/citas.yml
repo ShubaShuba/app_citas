@@ -3,7 +3,6 @@
 one:
   paciente: one
   medico: one
-  consultorio: one
   fecha: 2025-04-18
   hora: 2025-04-18 14:16:15
   motivo: MyText
@@ -12,7 +11,6 @@ one:
 two:
   paciente: two
   medico: two
-  consultorio: two
   fecha: 2025-04-18
   hora: 2025-04-18 14:16:15
   motivo: MyText

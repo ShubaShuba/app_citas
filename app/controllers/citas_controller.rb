@@ -8,6 +8,11 @@ class CitasController < ApplicationController
     render json: @citas.as_json(include: [:paciente, :medico])
   end
 
+  # GET /citas/:id
+  def show
+    render json: @cita.as_json(include: [:paciente, :medico])
+  end
+
   # POST /citas
   def create
     @cita = Cita.new(cita_params)
@@ -18,7 +23,7 @@ class CitasController < ApplicationController
     end
   end
 
-  # PUT /citas/:id
+  # PATCH/PUT /citas/:id
   def update
     if @cita.update(cita_params)
       render json: @cita
@@ -37,6 +42,8 @@ class CitasController < ApplicationController
 
   def set_cita
     @cita = Cita.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Cita no encontrada' }, status: :not_found
   end
 
   def cita_params
